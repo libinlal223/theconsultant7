@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import g1 from '../assets/gallery_new_1.jpg';
 import g2 from '../assets/gallery_new_2.jpg';
@@ -11,6 +11,49 @@ import g8 from '../assets/gallery_new_8.jpg';
 const images = [g1, g2, g3, g4, g5, g7, g8];
 
 const Gallery = () => {
+    // State to track the "active" image in the center of the viewport (mobile only)
+    const [activeIndex, setActiveIndex] = useState(null);
+    const imageRefs = useRef([]);
+
+    useEffect(() => {
+        const handleScrollCheck = () => {
+            // Only run detailed check on mobile/tablet widths
+            if (window.innerWidth >= 768) return;
+
+            const centerX = window.innerWidth / 2;
+            let closestIndex = -1;
+            let minDistance = Infinity;
+
+            imageRefs.current.forEach((img, idx) => {
+                if (!img) return;
+                const rect = img.getBoundingClientRect();
+
+                // Optimization: Skip checking images clearly off-screen
+                if (rect.right < 0 || rect.left > window.innerWidth) return;
+
+                const imgCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(imgCenter - centerX);
+
+                // Check if this image is the closest to the center
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestIndex = idx;
+                }
+            });
+
+            // Set active if closest image is within a "focus zone" (e.g., 80px from center)
+            if (minDistance < 80) {
+                setActiveIndex(closestIndex);
+            } else {
+                setActiveIndex(null);
+            }
+        };
+
+        // Run check frequently approx 10fps is enough for this visual update
+        const interval = setInterval(handleScrollCheck, 100);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <section id="gallery" className="relative w-full pt-16 pb-0 md:py-24 bg-black border-t border-white/5 overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 mb-12 flex flex-col items-center text-center">
@@ -45,16 +88,29 @@ const Gallery = () => {
                             // Assign different widths/aspect ratios based on index pattern
                             // Standardized Portrait Dimensions for better visibility of people
                             const currentClass = 'w-[280px] md:w-[350px]';
+                            const isActive = activeIndex === index;
 
                             return (
-                                <div key={index} className={`relative h-[400px] md:h-[480px] ${currentClass} flex-shrink-0 rounded-sm overflow-hidden border border-white/10 group grayscale hover:grayscale-0 transition-all duration-500`}>
+                                <div
+                                    key={index}
+                                    ref={el => imageRefs.current[index] = el}
+                                    className={`relative h-[400px] md:h-[480px] ${currentClass} flex-shrink-0 rounded-sm overflow-hidden border border-white/10 group
+                                    ${isActive ? 'grayscale-0 scale-105 z-10 border-gold/40' : 'grayscale'} 
+                                    md:grayscale md:hover:grayscale-0 
+                                    transition-all duration-500`}
+                                >
                                     <img
                                         src={img}
                                         alt={`Gallery Image ${index}`}
-                                        className="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                        className={`h-full w-full object-cover transition-transform duration-700
+                                        ${isActive ? 'scale-110' : 'scale-100'} 
+                                        group-hover:scale-110`}
                                     />
                                     {/* Gold Overlay */}
-                                    <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    <div className={`absolute inset-0 bg-gold/10 transition-opacity duration-300 pointer-events-none
+                                        ${isActive ? 'opacity-100' : 'opacity-0'}
+                                        group-hover:opacity-100`}>
+                                    </div>
 
                                     {/* Download Button */}
                                     {/* Desktop Download Button (Icon Only, Hover Trigger) */}
@@ -73,7 +129,8 @@ const Gallery = () => {
                                     <a
                                         href={img}
                                         download={`anil-kumar-gallery-${index}.png`}
-                                        className="md:hidden absolute bottom-4 right-4 z-20 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/20 rounded-full flex items-center gap-2 text-white active:scale-95 transition-transform"
+                                        className={`md:hidden absolute bottom-4 right-4 z-20 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/20 rounded-full flex items-center gap-2 text-white active:scale-95 transition-transform
+                                        ${isActive ? 'opacity-100' : 'opacity-70'}`}
                                     >
                                         <span className="text-[10px] uppercase font-bold tracking-widest">Download</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
