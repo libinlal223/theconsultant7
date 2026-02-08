@@ -1,5 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import ancLogo from '../assets/anc_logo.png';
+import cgicLogo from '../assets/cgic_logo.png';
+import hrpmLogo from '../assets/hrpm_logo.png';
+import vedikeLogo from '../assets/vedike_logo.png';
+
 
 const Services = () => {
 
@@ -63,7 +68,28 @@ const Services = () => {
                         {/* Scrollable Content Container */}
                         <div className="h-[500px] overflow-y-auto pr-4 space-y-8 custom-scrollbar border-l border-white/10 pl-6">
 
-
+                            {/* Section: Affiliations - Leadership Positions */}
+                            <div>
+                                <h4 className="text-gold font-oswald text-sm uppercase tracking-widest mb-3">Affiliations</h4>
+                                <div className="grid grid-cols-1 gap-3">
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded hover:bg-gold/10 hover:border-gold/30 transition-all duration-300 text-gray-400 font-light text-sm flex items-center justify-between">
+                                        <span>PATHANAMTHITTA DISTRICT PRESIDENT OF ANC</span>
+                                        <img src={ancLogo} alt="ANC Logo" className="h-10 w-10 object-contain rounded-full" />
+                                    </div>
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded hover:bg-gold/10 hover:border-gold/30 transition-all duration-300 text-gray-400 font-light text-sm flex items-center justify-between">
+                                        <span>NATIONAL MEMBER OF CGIC</span>
+                                        <img src={cgicLogo} alt="CGIC Logo" className="h-10 w-10 object-contain rounded-full" />
+                                    </div>
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded hover:bg-gold/10 hover:border-gold/30 transition-all duration-300 text-gray-400 font-light text-sm flex items-center justify-between">
+                                        <span>ACTIVE MEMBER OF HRPM</span>
+                                        <img src={hrpmLogo} alt="HRPM Logo" className="h-10 w-10 object-contain rounded-full" />
+                                    </div>
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded hover:bg-gold/10 hover:border-gold/30 transition-all duration-300 text-gray-400 font-light text-sm flex items-center justify-between">
+                                        <span>MEMBER OF KARNATAKA RAKSHANA VEDIKE</span>
+                                        <img src={vedikeLogo} alt="Karnataka Rakshana Vedike Logo" className="h-10 w-10 object-contain rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Section: Admission Officer */}
                             <div>
@@ -96,20 +122,7 @@ const Services = () => {
                                         "SAPTHAGIRI Institute of Medical Science And Research Centre, Bangalore",
                                         "SRI SIDHARTHA Institute of Medical Science And Research Centre, Nelamangala",
                                         "SRI SIDHARTHA Institute of Medical Science And Research Centre, Tumkur",
-                                        "SRI DEVI Institute of Medical Science And Research Hospital, Tumkur"
-                                    ].map((inst, i) => (
-                                        <div key={i} className="p-3 bg-white/5 border border-white/10 rounded hover:bg-gold/10 hover:border-gold/30 transition-all duration-300 text-gray-400 font-light text-sm">
-                                            {inst}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Section: Other Affiliations */}
-                            <div>
-                                <h4 className="text-gold font-oswald text-sm uppercase tracking-widest mb-3">Affiliated Institutions</h4>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {[
+                                        "SRI DEVI Institute of Medical Science And Research Hospital, Tumkur",
                                         "SRI RAGHAVENDRA Group of Institutions, Bangalore",
                                         "AKASH Group of Institutions, Bangalore",
                                         "SRINIVAS UNIVERSITY, Mangalore",

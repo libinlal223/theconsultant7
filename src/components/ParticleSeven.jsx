@@ -18,7 +18,7 @@ const ParticleSeven = ({ className, shiftX = 0, shiftY = 0, fontSize: customFont
 
         // Formatting configuration
         const font = 'bold 400px "Anton", sans-serif';
-        const particleDensity = 4;
+        const particleDensity = 7;
         const particleSize = 1.6;
         const colors = ['#D4AF37', '#F9DF74', '#B4941F'];
 

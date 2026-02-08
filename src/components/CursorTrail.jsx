@@ -1,12 +1,21 @@
 import React, { useEffect, useRef } from 'react';
+import { isLowEndDevice } from '../utils/performance';
 
 const CursorTrail = () => {
+    // Optimization: Disable entirely on low-end devices
+    if (isLowEndDevice()) return null;
+
     const canvasRef = useRef(null);
     const pointsRef = useRef([]);
     const cursorRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
+        // Double check for mobile width to avoid running JS loop unnecessary
+        if (window.innerWidth < 1024) return;
+
         const canvas = canvasRef.current;
+        if (!canvas) return;
+
         const ctx = canvas.getContext('2d');
         let animationFrameId;
 

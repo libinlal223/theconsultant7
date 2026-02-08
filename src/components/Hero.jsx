@@ -1,18 +1,34 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import anilImage from '../assets/anil_kumar.png';
+import anilImage from '../assets/anil_kumar.webp';
+import { useOptimizedAnimation } from '../hooks/useOptimizedAnimation';
+import { usePerformanceTier } from '../utils/performance';
 
 const Hero = () => {
-    const containerRef = useRef(null);
-    const { scrollY } = useScroll();
+    // Optimization: Only animate when in view
+    const [containerRef, shouldAnimate] = useOptimizedAnimation({ margin: "100px" });
+    const tier = usePerformanceTier(); // 'high' or 'low'
 
-    // Smooth parallax effects
+    // Smooth parallax effects (only if animating)
+    const { scrollY } = useScroll();
     const yText = useTransform(scrollY, [0, 500], [0, 150]);
     const yImage = useTransform(scrollY, [0, 500], [0, -50]);
     const opacityImage = useTransform(scrollY, [0, 400], [1, 0]);
 
-    // Marquee content repeated for seamless loop
+    // Marquee content
     const marqueeText = "THE CONSULTANT";
+
+    // Reduce items for low performance devices
+    const marqueeItems = tier === 'low' ? [1, 2] : [1, 2, 3, 4];
+
+    // Animation configuration
+    const marqueeTransition = {
+        repeat: Infinity,
+        duration: 30,
+        ease: "linear",
+        // Pause animation when not in view or tab hidden
+        repeatType: "loop"
+    };
 
     return (
         <section
@@ -20,25 +36,28 @@ const Hero = () => {
             id="home"
             className="relative h-screen w-full overflow-hidden bg-black flex flex-col justify-end items-center"
         >
-            {/* 1. Background Grid/Noise (Optional Texture) */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-0 pointer-events-none mix-blend-overlay"></div>
+            {/* 1. Background Grid/Noise (Optional Texture) - Disable on low tier */}
+            {tier === 'high' && (
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-0 pointer-events-none mix-blend-overlay"></div>
+            )}
 
             {/* 2. Marquee Layer (Behind Image) - Centered vertically */}
-            <div className="absolute top-1/2 transform -translate-y-1/2 w-full z-0">
+            <div className="absolute top-1/2 transform -translate-y-1/2 w-full z-10 pointer-events-none">
 
                 {/* Stacked Layers for Mobile (Visible on MD and smaller) */}
                 <motion.div
                     className="flex whitespace-nowrap md:hidden absolute -top-[26vh] left-0 w-full"
-                    style={{ y: yText }}
+                    style={{ y: shouldAnimate ? yText : 0 }}
                 >
                     <motion.div
                         className="flex whitespace-nowrap"
-                        animate={{ x: ["0%", "-50%"] }}
-                        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                        animate={shouldAnimate ? { x: ["0%", "-50%"] } : { x: "0%" }} // Pause
+                        transition={marqueeTransition}
                     >
-                        {[1, 2, 3, 4].map((i) => (
+                        {marqueeItems.map((i) => (
                             <div key={i} className="flex relative items-center mr-40">
-                                <span className="text-[20vw] font-anton text-gold opacity-[0.15] leading-none tracking-wide">
+                                <span className="text-[20vw] font-anton text-gold opacity-[0.15] leading-none tracking-wide"
+                                    style={{ willChange: 'transform' }}> {/* Hint to browser */}
                                     {marqueeText}
                                 </span>
                             </div>
@@ -48,16 +67,17 @@ const Hero = () => {
 
                 <motion.div
                     className="flex whitespace-nowrap md:hidden absolute -top-[13vh] left-0 w-full"
-                    style={{ y: yText }}
+                    style={{ y: shouldAnimate ? yText : 0 }}
                 >
                     <motion.div
                         className="flex whitespace-nowrap"
-                        animate={{ x: ["0%", "-50%"] }}
-                        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                        animate={shouldAnimate ? { x: ["0%", "-50%"] } : { x: "0%" }}
+                        transition={marqueeTransition}
                     >
-                        {[1, 2, 3, 4].map((i) => (
+                        {marqueeItems.map((i) => (
                             <div key={i} className="flex relative items-center mr-40">
-                                <span className="text-[20vw] font-anton text-gold opacity-[0.25] leading-none tracking-wide">
+                                <span className="text-[20vw] font-anton text-gold opacity-[0.25] leading-none tracking-wide"
+                                    style={{ willChange: 'transform' }}>
                                     {marqueeText}
                                 </span>
                             </div>
@@ -68,17 +88,18 @@ const Hero = () => {
                 {/* Main Marquee Layer */}
                 <motion.div
                     className="flex whitespace-nowrap"
-                    style={{ y: yText }}
+                    style={{ y: shouldAnimate ? yText : 0 }}
                 >
                     <motion.div
                         className="flex whitespace-nowrap"
-                        animate={{ x: ["0%", "-50%"] }}
-                        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                        animate={shouldAnimate ? { x: ["0%", "-50%"] } : { x: "0%" }}
+                        transition={marqueeTransition}
                     >
-                        {[1, 2, 3, 4].map((i) => (
+                        {marqueeItems.map((i) => (
                             <div key={i} className="flex relative items-center mr-40">
                                 {/* Solid Gold Text with optimized responsive sizing */}
-                                <span className="text-[20vw] md:text-[13vw] font-anton text-gold opacity-50 leading-none tracking-wide">
+                                <span className="text-[20vw] md:text-[13vw] font-anton text-gold opacity-50 leading-none tracking-wide"
+                                    style={{ willChange: 'transform' }}>
                                     {marqueeText}
                                 </span>
                             </div>
@@ -89,12 +110,15 @@ const Hero = () => {
 
             {/* 3. Character Image Layer */}
             <motion.div
-                className="relative z-10 h-[60vh] sm:h-[75vh] md:h-[90vh] w-full max-w-5xl flex items-end justify-center pointer-events-none mb-20 md:mb-0"
-                style={{ y: yImage, opacity: opacityImage }}
+                className="relative z-50 h-[60vh] sm:h-[75vh] md:h-[90vh] w-full max-w-5xl flex items-end justify-center pointer-events-none mb-20 md:mb-0"
+                style={{ y: shouldAnimate ? yImage : 0, opacity: shouldAnimate ? opacityImage : 1 }}
             >
                 <motion.img
                     src={anilImage}
                     alt="Anil Kumar"
+                    // Decode async for non-blocking main thread
+                    decoding="async"
+                    loading="eager" // Hero image should be eager
                     className="object-contain h-full w-auto drop-shadow-[0_0_30px_rgba(212,175,55,0.1)] md:drop-shadow-[0_0_50px_rgba(212,175,55,0.15)]"
                     initial={{ scale: 1.1, y: 100, filter: 'blur(10px)' }}
                     animate={{ scale: 1, y: 0, filter: 'blur(0px)' }}
@@ -123,7 +147,7 @@ const Hero = () => {
                 >
                     <motion.div
                         className="w-[1px] h-12 bg-gold"
-                        animate={{ height: [0, 48, 0], y: [0, 0, 20] }}
+                        animate={shouldAnimate ? { height: [0, 48, 0], y: [0, 0, 20] } : { height: 48 }}
                         transition={{ repeat: Infinity, duration: 2 }}
                     />
                 </motion.div>

@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import g1 from '../assets/gallery_new_1.jpg';
-import g2 from '../assets/gallery_new_2.jpg';
-import g3 from '../assets/gallery_new_3.jpg';
-import g4 from '../assets/gallery_new_4.jpg';
-import g5 from '../assets/gallery_new_5.jpg';
-import g7 from '../assets/gallery_new_7.jpg';
-import g8 from '../assets/gallery_new_8.jpg';
+import g1 from '../assets/gallery_new_1.webp';
+import g2 from '../assets/gallery_new_2.webp';
+import g3 from '../assets/gallery_new_3.webp';
+import g4 from '../assets/gallery_new_4.webp';
+import g5 from '../assets/gallery_new_5.webp';
+import g7 from '../assets/gallery_new_7.webp';
+import g8 from '../assets/gallery_new_8.webp';
+import { useOptimizedAnimation } from '../hooks/useOptimizedAnimation';
+import { usePerformanceTier } from '../utils/performance';
 
 const images = [g1, g2, g3, g4, g5, g7, g8];
 
@@ -15,7 +17,14 @@ const Gallery = () => {
     const [activeIndex, setActiveIndex] = useState(null);
     const imageRefs = useRef([]);
 
+    // Performance Optimization
+    const [containerRef, shouldAnimate, isInView] = useOptimizedAnimation({ margin: "100px" });
+    const tier = usePerformanceTier();
+
     useEffect(() => {
+        // Pause checking if not in view
+        if (!isInView) return;
+
         const handleScrollCheck = () => {
             // Only run detailed check on mobile/tablet widths
             if (window.innerWidth >= 768) return;
@@ -49,18 +58,29 @@ const Gallery = () => {
             }
         };
 
-        // Run check frequently approx 10fps is enough for this visual update
-        const interval = setInterval(handleScrollCheck, 100);
+        // Run check frequently - limit rate on low tier devices
+        const intervalDelay = tier === 'low' ? 200 : 100;
+        const interval = setInterval(handleScrollCheck, intervalDelay);
         return () => clearInterval(interval);
-    }, []);
+    }, [isInView, tier]);
+
+    const galleryList = [...images, ...images, ...images];
+
+    // Reduce duplicate items for low performance (if list is very long), but here 3x7=21 is fine.
+    // If we wanted to optimize specifically for mobile we could reduce it.
 
     return (
-        <section id="gallery" className="relative w-full pt-16 pb-0 md:py-24 bg-black border-t border-white/5 overflow-hidden">
+        <section
+            id="gallery"
+            ref={containerRef}
+            className="relative w-full pt-16 pb-0 md:py-24 bg-black border-t border-white/5 overflow-hidden"
+        >
             <div className="max-w-7xl mx-auto px-6 mb-12 flex flex-col items-center text-center">
                 <motion.h2
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
+                    viewport={{ once: true }} // Optimization: Only trigger entry animation once
                     className="text-5xl md:text-7xl font-anton uppercase tracking-tight text-white mb-4"
                 >
                     <span className="text-gold">G</span><span className="text-transparent text-stroke-gold opacity-80">ALLERY</span>
@@ -76,19 +96,23 @@ const Gallery = () => {
                 <div className="flex">
                     <motion.div
                         className="flex gap-6 flex-nowrap"
-                        animate={{ x: ["0%", "-33.333%"] }}
+                        animate={shouldAnimate ? { x: ["0%", "-33.333%"] } : { x: "0%" }}
                         transition={{
                             repeat: Infinity,
-                            duration: 30,
+                            duration: tier === 'low' ? 40 : 30, // Slower on low tier for less frame drops
                             ease: "linear"
                         }}
+                        style={{ willChange: 'transform' }} // Optimization hint
                     >
                         {/* Repeat images twice to create seamless loop */}
-                        {[...images, ...images, ...images].map((img, index) => {
+                        {galleryList.map((img, index) => {
                             // Assign different widths/aspect ratios based on index pattern
                             // Standardized Portrait Dimensions for better visibility of people
                             const currentClass = 'w-[280px] md:w-[350px]';
                             const isActive = activeIndex === index;
+
+                            // We can skip heavy hover effects on low tier or scrolling
+                            const isLowTier = tier === 'low';
 
                             return (
                                 <div
@@ -102,9 +126,11 @@ const Gallery = () => {
                                     <img
                                         src={img}
                                         alt={`Gallery Image ${index}`}
+                                        loading="lazy"
+                                        decoding="async"
                                         className={`h-full w-full object-cover transition-transform duration-700
                                         ${isActive ? 'scale-110' : 'scale-100'} 
-                                        group-hover:scale-110`}
+                                        ${!isLowTier && 'group-hover:scale-110'}`}
                                     />
                                     {/* Gold Overlay */}
                                     <div className={`absolute inset-0 bg-gold/10 transition-opacity duration-300 pointer-events-none

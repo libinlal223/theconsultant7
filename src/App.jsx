@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import CursorTrail from './components/CursorTrail';
 import Hero from './components/Hero';
-import About from './pages/About';
-import Services from './pages/Services';
-import Gallery from './pages/Gallery';
-import Contact from './pages/Contact';
 import Loader from './components/Loader';
+
+// Code Splitting / Lazy Loading for performance
+const About = React.lazy(() => import('./pages/About'));
+const Services = React.lazy(() => import('./pages/Services'));
+const Gallery = React.lazy(() => import('./pages/Gallery'));
+const Contact = React.lazy(() => import('./pages/Contact'));
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -23,10 +25,12 @@ function App() {
           <CursorTrail />
           <Navbar />
           <Hero />
-          <About />
-          <Services />
-          <Gallery />
-          <Contact />
+          <Suspense fallback={<div className="h-screen w-full bg-black"></div>}>
+            <About />
+            <Services />
+            <Gallery />
+            <Contact />
+          </Suspense>
         </div>
       )}
     </div>

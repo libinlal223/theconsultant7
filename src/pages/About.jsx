@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import anilImage from '../assets/profile_new.jpg';
+import anilImage from '../assets/profile_new.webp';
 
 
 const About = () => {
@@ -26,6 +26,8 @@ const About = () => {
                         <img
                             src={anilImage}
                             alt="Anil Kumar A S - Educational Consultant"
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out scale-100 group-hover:scale-105"
                         />
 
