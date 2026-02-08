@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import ancLogo from '../assets/anc_logo.png';
-import cgicLogo from '../assets/cgic_logo.png';
-import hrpmLogo from '../assets/hrpm_logo.png';
-import vedikeLogo from '../assets/vedike_logo.png';
+import ancLogo from '../assets/anc_logo.webp';
+import cgicLogo from '../assets/cgic_logo.webp';
+import hrpmLogo from '../assets/hrpm_logo.webp';
+import vedikeLogo from '../assets/vedike_logo.webp';
 
 
 const Services = () => {

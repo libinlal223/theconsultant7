@@ -147,7 +147,6 @@ const ParticleSeven = ({ className, shiftX = 0, shiftY = 0, fontSize: customFont
             targetPoints.forEach(pt => {
                 if (Math.random() > 0.3) particles.push(new Particle(0, 0, pt.x, pt.y));
             });
-            console.log("Particle7: Initialized with", particles.length, "particles");
             return true;
         };
 
@@ -176,11 +175,7 @@ const ParticleSeven = ({ className, shiftX = 0, shiftY = 0, fontSize: customFont
                     canvas.height = h;
                     canvasRect = canvas.getBoundingClientRect();
 
-                    const success = init();
-                    if (!success) {
-                        // Font might not be loaded, try again in a bit
-                        // console.log("Init failed (no points), retrying...");
-                    }
+                    init();
                 }
             }
         };
